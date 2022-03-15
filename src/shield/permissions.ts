@@ -29,7 +29,6 @@ const ruleTree: PermissionsSchema = {
   },
   Mutation: {
     '*': deny,
-    wechatSignIn: deny,
     login: allow,
     signUp: allow,
     addUserPermission: isCanPolicy(['userPermission', 'create']),

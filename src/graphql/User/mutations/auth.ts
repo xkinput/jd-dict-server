@@ -5,11 +5,10 @@ import axios from 'axios'
 import { sign } from 'jsonwebtoken'
 
 import { auth } from '@/api/wx'
-import { APP_JWT_SECRET, TOKEN_EXPIRE_TIME, WX_MINI_APP } from '@/config/app'
+import { TOKEN_EXPIRE_TIME, } from '@/config/app'
 import { UserStatusData } from '../utils'
 import { ApolloError } from 'apollo-server-koa'
 import { UserRole } from '../types'
-import { Levels } from '@/utils/level'
 import { SignUser } from '@/utils/user'
 
 interface Code2Session {
@@ -19,7 +18,7 @@ interface Code2Session {
   errcode?: number;
   errmsg?: string;
 }
-
+/*
 export const wechatSignIn = mutationField('wechatSignIn', {
   type: 'UserLogin',
   args: {
@@ -116,7 +115,9 @@ export const wechatSignIn = mutationField('wechatSignIn', {
     }
   }
 })
+*/
 
+console.log(process.env)
 export const login = mutationField('login', {
   type: 'UserLogin',
   args: {
@@ -158,7 +159,7 @@ export const login = mutationField('login', {
         {
           ...userInfo
         },
-        APP_JWT_SECRET,
+        process.env.APP_JWT_SECRET,
         {
           expiresIn: TOKEN_EXPIRE_TIME
         }
@@ -176,7 +177,6 @@ export const signUp = mutationField('signUp', {
     data: object({
       name: string().min(3, '名称最少3位').max(30, '名称最大30位'),
       password: string().min(6, '密码最少6位').max(30, '密码最大30位'),
-      phone: string().nullable().phone('CN', '请输入有效的中国区手机号码')
     })
   }),
   async resolve (_parent, { data }, { prisma, ctx, casbin }) {
@@ -190,11 +190,6 @@ export const signUp = mutationField('signUp', {
       data: {
         name,
         password: hashedPassword,
-        level: {
-          connect: {
-            name: Levels.NORMAL
-          }
-        },
         roles: {
           connect: {
             value: UserRole.CLIENT

@@ -33,6 +33,8 @@ enum UserStatus {
 
 model User {
   id         Int        @id @default(autoincrement())
+  createAt   DateTime   @default(now())
+  updateAt   DateTime   @updatedAt
   name       String?    @unique
   nickname   String?
   password   String?
@@ -42,9 +44,30 @@ model User {
   signUpType SignUpType @default(WECHAT)
   wechat     Wechat?    @relation(fields: [wechatId], references: [id], onDelete: Cascade)
   wechatId   Int?       @unique
-  Notice     Notice[]
-  createAt   DateTime   @default(now())
-  updateAt   DateTime   @updatedAt
+  notice     Notice[]
+  phrase     Phrase[]
+}
+
+model Phrase {
+  id       Int       @id @default(autoincrement())
+  createAt DateTime  @default(now())
+  updateAt DateTime  @updatedAt
+  word     String
+  code     String
+  comments Comment[]
+  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  createAt  DateTime  @default(now())
+  content   String
+  phrase    Phrase?   @relation(fields: [phraseId], references: [id])
+  phraseId  Int?
+  comments  Comment[] @relation("CommentToComment")
+  comment   Comment?  @relation("CommentToComment", fields: [commentId], references: [id])
+  commentId Int?
 }
 
 model Role {
