@@ -117,7 +117,6 @@ export const wechatSignIn = mutationField('wechatSignIn', {
 })
 */
 
-console.log(process.env)
 export const login = mutationField('login', {
   type: 'UserLogin',
   args: {
