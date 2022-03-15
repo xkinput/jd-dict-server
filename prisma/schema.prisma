@@ -1,0 +1,97 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "extendedIndexes"]
+}
+
+model CasbinRule {
+  id    Int     @id @default(autoincrement())
+  ptype String
+  v0    String?
+  v1    String?
+  v2    String?
+  v3    String?
+  v4    String?
+  v5    String?
+
+  @@map("casbin_rule")
+}
+
+enum SignUpType {
+  USERNAME
+  WECHAT
+}
+
+enum UserStatus {
+  ENABLE
+  DISABLE
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  name       String?    @unique
+  nickname   String?
+  password   String?
+  phone      String?
+  status     UserStatus @default(ENABLE)
+  roles      Role[]
+  signUpType SignUpType @default(WECHAT)
+  wechat     Wechat?    @relation(fields: [wechatId], references: [id], onDelete: Cascade)
+  wechatId   Int?       @unique
+  Notice     Notice[]
+  createAt   DateTime   @default(now())
+  updateAt   DateTime   @updatedAt
+}
+
+model Role {
+  id       Int      @id @default(autoincrement())
+  name     String   @unique
+  value    String   @unique
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  users    User[]
+}
+
+model Wechat {
+  id        Int      @id @default(autoincrement())
+  openid    String   @unique
+  unionid   String?  @unique
+  avatarUrl String?
+  city      String?
+  country   String?
+  gender    Int?     @db.SmallInt
+  language  String?
+  nickName  String?
+  province  String?
+  user      User?
+  createAt  DateTime @default(now())
+  updateAt  DateTime @updatedAt
+}
+
+model Notice {
+  id        Int       @id @default(autoincrement())
+  title     String    @unique
+  content   String
+  createdAt DateTime  @default(now())
+  publishAt DateTime?
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int
+}
+
+model Permission {
+  id      Int                @id @default(autoincrement())
+  name    String             @unique
+  value   String             @unique
+  actions PermissionAction[]
+}
+
+model PermissionAction {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  value       String       @unique
+  permissions Permission[]
+}
