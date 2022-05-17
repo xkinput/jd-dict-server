@@ -15,6 +15,10 @@ async function start() {
       name: '管理员',
       value: UserRole.MANAGER
     },
+    {
+      name: '用户',
+      value: UserRole.NORMAL
+    },
   ]
   await prisma.role.createMany({
     data: roles,
@@ -22,14 +26,14 @@ async function start() {
   })
   const e = await casbinAdapter.create()
   const rules = [
-    ['term:page', 'read'],
+    ['phrase:page', 'read'],
   ]
   for (let rule of rules) {
     await e.addPolicy(...[UserRole.ROOT, rule[0], rule[1]])
   }
 
   const initRules = [
-    [UserRole.CLIENT, 'term', 'edit'],
+    [UserRole.NORMAL, 'phrase', 'add'],
   ]
   for (let rule of initRules) {
     await e.addPolicy(...[rule[0], rule[1], rule[2]])

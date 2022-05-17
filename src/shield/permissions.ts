@@ -10,6 +10,7 @@ type PermissionsSchema = IRules & {
 const ruleTree: PermissionsSchema = {
   Query: {
     '*': deny,
+    findManyPhrase: allow,
     findUserMe: isAuthenticated,
     findUniqueUser: isCanPolicy(['user', 'read']),
     findUniqueRole: isCanPolicy(['role', 'read']),
@@ -43,6 +44,7 @@ const ruleTree: PermissionsSchema = {
     deleteOnePermissionAction: isCanPolicy(['permissionAction', 'delete']),
     deleteOneUser: isCanPolicy(['user', 'delete']),
     deletePolicy: isCanPolicy(['userPermission', 'delete']),
+    createSubmitOnePhrase: isAuthenticated,
   },
 }
 

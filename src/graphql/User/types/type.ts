@@ -3,7 +3,7 @@ import { inputObjectType, nonNull, objectType } from 'nexus'
 export enum UserRole {
   ROOT = 'R:ROOT',
   MANAGER = 'R:MANAGER',
-  CLIENT = 'R:CLIENT',
+  NORMAL = 'R:NORMAL',
 }
 
 export const UserLogin = objectType({
@@ -26,7 +26,6 @@ export const UserSignUpInput = inputObjectType({
   definition(t) {
     t.nonNull.string('name')
     t.string('nickname')
-    t.nonNull.string('phone')
     t.nonNull.string('password')
   }
 })

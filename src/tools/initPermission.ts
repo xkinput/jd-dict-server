@@ -72,6 +72,11 @@ async function start() {
       value: 'role',
       actions: ['create', 'read', 'update', 'delete']
     },
+    {
+      name: '词条',
+      value: 'phrase',
+      actions: ['create', 'read', 'update', 'delete']
+    },
   ]
 
   for (let permission of permissions) {

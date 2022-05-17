@@ -51,15 +51,41 @@ model User {
   phrase     Phrase[]
 }
 
+/// 词条类型
+enum PhraseType {
+  /// 单字
+  Single
+  /// 词组
+  Phrase
+  /// 短句
+  Sentence
+  /// 符号
+  Symbol
+  /// 链接
+  Link
+  /// 诗句
+  Poem
+  /// 其他
+  Other
+}
+
 /// 词条
 model Phrase {
-  id       Int       @id @default(autoincrement())
-  createAt DateTime  @default(now())
-  updateAt DateTime  @updatedAt
+  id       Int        @id @default(autoincrement())
+  createAt DateTime   @default(now())
+  updateAt DateTime   @updatedAt
+  /// 词条
   word     String
+  /// 编码
   code     String
+  /// 类型
+  type     PhraseType
+  /// 词频
+  index    Int
+  /// 评论
   comments Comment[]
-  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// 发起人
+  user     User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   Int
 }
 

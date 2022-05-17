@@ -191,7 +191,7 @@ export const signUp = mutationField('signUp', {
         password: hashedPassword,
         roles: {
           connect: {
-            value: UserRole.CLIENT
+            value: UserRole.NORMAL
           }
         },
         signUpType: 'USERNAME',
@@ -199,7 +199,7 @@ export const signUp = mutationField('signUp', {
       }
     })
 
-    await casbin.e.addRoleForUser(name, UserRole.CLIENT)
+    await casbin.e.addRoleForUser(name, UserRole.NORMAL)
 
     return user
   }
