@@ -6,6 +6,7 @@ export const CasbinRule = objectType({
     input: false,
   },
   name: 'CasbinRule',
+  description: `Casbin权限记录`,
   definition(t) {
     t.int('id')
     t.string('ptype')

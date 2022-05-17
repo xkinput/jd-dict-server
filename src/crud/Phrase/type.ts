@@ -6,6 +6,7 @@ export const Phrase = objectType({
     input: false,
   },
   name: 'Phrase',
+  description: `词条`,
   definition(t) {
     t.int('id')
     t.field('createAt', { type: 'DateTime' })

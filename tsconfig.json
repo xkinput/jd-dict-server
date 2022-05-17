@@ -2,7 +2,10 @@
   "compilerOptions": {
     "module": "commonjs",
     "esModuleInterop": true,
-    "lib": ["esnext", "dom"],
+    "lib": [
+      "esnext",
+      "dom"
+    ],
     "target": "esnext",
     "noImplicitAny": false,
     "moduleResolution": "node",
@@ -12,11 +15,21 @@
     "strictNullChecks": false,
     "skipLibCheck": true,
     "baseUrl": "./",
-    "types": ["node", "miniprogram-api-typings"],
+    "types": [
+      "node",
+      "miniprogram-api-typings"
+    ],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     }
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

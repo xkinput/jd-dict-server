@@ -6,6 +6,7 @@ export const User = objectType({
     input: false,
   },
   name: 'User',
+  description: `用户`,
   definition(t) {
     t.int('id')
     t.field('createAt', { type: 'DateTime' })

@@ -6,6 +6,7 @@ export const Wechat = objectType({
     input: false,
   },
   name: 'Wechat',
+  description: `微信`,
   definition(t) {
     t.int('id')
     t.string('openid')

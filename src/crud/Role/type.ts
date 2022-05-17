@@ -6,6 +6,7 @@ export const Role = objectType({
     input: false,
   },
   name: 'Role',
+  description: `权限-角色`,
   definition(t) {
     t.int('id')
     t.string('name')

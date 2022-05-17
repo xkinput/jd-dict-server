@@ -6,6 +6,7 @@ export const Notice = objectType({
     input: false,
   },
   name: 'Notice',
+  description: `通知`,
   definition(t) {
     t.int('id')
     t.string('title')

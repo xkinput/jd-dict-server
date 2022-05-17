@@ -6,6 +6,7 @@ export const Comment = objectType({
     input: false,
   },
   name: 'Comment',
+  description: `词组-评论`,
   definition(t) {
     t.int('id')
     t.field('createAt', { type: 'DateTime' })

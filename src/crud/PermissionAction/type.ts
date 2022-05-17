@@ -6,6 +6,7 @@ export const PermissionAction = objectType({
     input: false,
   },
   name: 'PermissionAction',
+  description: `权限-权限操作`,
   definition(t) {
     t.int('id')
     t.string('name')
