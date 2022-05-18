@@ -8,6 +8,11 @@ generator client {
   previewFeatures = ["fullTextSearch", "extendedIndexes"]
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+  theme    = "forest"
+}
+
 /// Casbin权限记录
 model CasbinRule {
   id    Int     @id @default(autoincrement())
@@ -35,20 +40,22 @@ enum UserStatus {
 
 /// 用户
 model User {
-  id         Int        @id @default(autoincrement())
-  createAt   DateTime   @default(now())
-  updateAt   DateTime   @updatedAt
-  name       String?    @unique
-  nickname   String?
-  password   String?
-  phone      String?
-  status     UserStatus @default(ENABLE)
-  roles      Role[]
-  signUpType SignUpType @default(WECHAT)
-  wechat     Wechat?    @relation(fields: [wechatId], references: [id], onDelete: Cascade)
-  wechatId   Int?       @unique
-  notice     Notice[]
-  phrase     Phrase[]
+  id           Int           @id @default(autoincrement())
+  createAt     DateTime      @default(now())
+  updateAt     DateTime      @updatedAt
+  name         String?       @unique
+  nickname     String?
+  password     String?
+  phone        String?
+  status       UserStatus    @default(ENABLE)
+  roles        Role[]
+  signUpType   SignUpType    @default(WECHAT)
+  wechat       Wechat?       @relation(fields: [wechatId], references: [id], onDelete: Cascade)
+  wechatId     Int?          @unique
+  notices      Notice[]
+  phrases      Phrase[]
+  pullRequests PullRequest[]
+  actions      Action[]
 }
 
 /// 词条类型
@@ -69,11 +76,21 @@ enum PhraseType {
   Other
 }
 
+/// 词条状态
+enum PhraseStatus {
+  /// 完成状态
+  Finish
+  /// 草案
+  Draft
+  /// 拒绝
+  Reject
+}
+
 /// 词条
 model Phrase {
-  id       Int        @id @default(autoincrement())
-  createAt DateTime   @default(now())
-  updateAt DateTime   @updatedAt
+  id       Int          @id @default(autoincrement())
+  createAt DateTime     @default(now())
+  updateAt DateTime     @updatedAt
   /// 词条
   word     String
   /// 编码
@@ -82,23 +99,91 @@ model Phrase {
   type     PhraseType
   /// 词频
   index    Int
+  /// 状态
+  status   PhraseStatus
   /// 评论
   comments Comment[]
   /// 发起人
-  user     User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   Int
+  /// 标签
+  tags     Tag[]
+  /// 关联操作
+  actions  Action[]
+}
+
+/// 标签
+/// 用于搜索关联词条
+model Tag {
+  id       Int      @id @default(autoincrement())
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  name     String
+  phrases  Phrase[]
 }
 
 /// 词组-评论
 model Comment {
-  id        Int       @id @default(autoincrement())
-  createAt  DateTime  @default(now())
-  content   String
-  phrase    Phrase?   @relation(fields: [phraseId], references: [id])
-  phraseId  Int?
-  comments  Comment[] @relation("CommentToComment")
-  comment   Comment?  @relation("CommentToComment", fields: [commentId], references: [id])
-  commentId Int?
+  id            Int          @id @default(autoincrement())
+  createAt      DateTime     @default(now())
+  content       String
+  comments      Comment[]    @relation("CommentToComment")
+  comment       Comment?     @relation("CommentToComment", fields: [commentId], references: [id])
+  commentId     Int?
+  phrase        Phrase?      @relation(fields: [phraseId], references: [id])
+  phraseId      Int?
+  pullRequest   PullRequest? @relation(fields: [pullRequestId], references: [id])
+  pullRequestId Int?
+}
+
+/// 词条操作类型
+enum ActionType {
+  /// 创建
+  Create
+  /// 修改
+  Change
+  /// 移动优先级
+  Move
+  /// 删除
+  Delete
+}
+
+/// 词条-操作
+/// 记录如何去调整一个词条
+model Action {
+  id           Int           @id @default(autoincrement())
+  createAt     DateTime      @default(now())
+  updateAt     DateTime      @updatedAt
+  phrase       Phrase        @relation(fields: [phraseId], references: [id])
+  phraseId     Int
+  word         String
+  code         String
+  user         User          @relation(fields: [userId], references: [id])
+  userId       Int
+  type         ActionType
+  pullRequests PullRequest[]
+}
+
+enum PullRequestStatus {
+  /// 待审核
+  Pending
+  /// 审核通过
+  Approved
+  /// 审核拒绝
+  Rejected
+}
+
+/// 词条-拉取请求
+model PullRequest {
+  id       Int               @id @default(autoincrement())
+  createAt DateTime          @default(now())
+  content  String
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
+  action   Action            @relation(fields: [actionId], references: [id])
+  actionId Int
+  status   PullRequestStatus
+  comments Comment[]
 }
 
 /// 权限-角色
