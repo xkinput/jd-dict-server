@@ -10,6 +10,7 @@ export const PullRequest = objectType({
   definition(t) {
     t.int('id')
     t.field('createAt', { type: 'DateTime' })
+    t.field('updateAt', { type: 'DateTime' })
     t.string('content')
     t.field('user', {
       type: 'User',

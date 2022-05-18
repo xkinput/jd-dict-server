@@ -10,6 +10,7 @@ export const Comment = objectType({
   definition(t) {
     t.int('id')
     t.field('createAt', { type: 'DateTime' })
+    t.field('updateAt', { type: 'DateTime' })
     t.string('content')
     t.list.field('comments', {
       type: 'Comment',
