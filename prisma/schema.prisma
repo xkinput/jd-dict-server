@@ -10,7 +10,6 @@ generator client {
 
 generator erd {
   provider = "prisma-erd-generator"
-  theme    = "forest"
 }
 
 /// Casbin权限记录
@@ -126,6 +125,7 @@ model Tag {
 model Comment {
   id            Int          @id @default(autoincrement())
   createAt      DateTime     @default(now())
+  updateAt      DateTime     @updatedAt
   content       String
   comments      Comment[]    @relation("CommentToComment")
   comment       Comment?     @relation("CommentToComment", fields: [commentId], references: [id])
@@ -177,6 +177,7 @@ enum PullRequestStatus {
 model PullRequest {
   id       Int               @id @default(autoincrement())
   createAt DateTime          @default(now())
+  updateAt DateTime          @updatedAt
   content  String
   user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   Int

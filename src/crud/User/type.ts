@@ -37,7 +37,7 @@ export const User = objectType({
       },
     })
     t.nullable.int('wechatId')
-    t.list.field('notice', {
+    t.list.field('notices', {
       type: 'Notice',
       args: {
         where: 'NoticeWhereInput',
@@ -48,10 +48,10 @@ export const User = objectType({
         distinct: 'NoticeScalarFieldEnum',
       },
       resolve(root: any) {
-        return root.notice
+        return root.notices
       },
     })
-    t.list.field('phrase', {
+    t.list.field('phrases', {
       type: 'Phrase',
       args: {
         where: 'PhraseWhereInput',
@@ -62,7 +62,35 @@ export const User = objectType({
         distinct: 'PhraseScalarFieldEnum',
       },
       resolve(root: any) {
-        return root.phrase
+        return root.phrases
+      },
+    })
+    t.list.field('pullRequests', {
+      type: 'PullRequest',
+      args: {
+        where: 'PullRequestWhereInput',
+        orderBy: 'PullRequestOrderByWithRelationAndSearchRelevanceInput',
+        cursor: 'PullRequestWhereUniqueInput',
+        take: 'Int',
+        skip: 'Int',
+        distinct: 'PullRequestScalarFieldEnum',
+      },
+      resolve(root: any) {
+        return root.pullRequests
+      },
+    })
+    t.list.field('actions', {
+      type: 'Action',
+      args: {
+        where: 'ActionWhereInput',
+        orderBy: 'ActionOrderByWithRelationAndSearchRelevanceInput',
+        cursor: 'ActionWhereUniqueInput',
+        take: 'Int',
+        skip: 'Int',
+        distinct: 'ActionScalarFieldEnum',
+      },
+      resolve(root: any) {
+        return root.actions
       },
     })
     t.field('_count', {

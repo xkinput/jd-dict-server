@@ -15,6 +15,7 @@ export const Phrase = objectType({
     t.string('code', { description: `编码` })
     t.field('type', { description: '类型', type: 'PhraseType' })
     t.int('index', { description: `词频` })
+    t.field('status', { description: '状态', type: 'PhraseStatus' })
     t.list.field('comments', {
       description: '评论',
       type: 'Comment',
@@ -38,6 +39,36 @@ export const Phrase = objectType({
       },
     })
     t.int('userId')
+    t.list.field('tags', {
+      description: '标签',
+      type: 'Tag',
+      args: {
+        where: 'TagWhereInput',
+        orderBy: 'TagOrderByWithRelationAndSearchRelevanceInput',
+        cursor: 'TagWhereUniqueInput',
+        take: 'Int',
+        skip: 'Int',
+        distinct: 'TagScalarFieldEnum',
+      },
+      resolve(root: any) {
+        return root.tags
+      },
+    })
+    t.list.field('actions', {
+      description: '关联操作',
+      type: 'Action',
+      args: {
+        where: 'ActionWhereInput',
+        orderBy: 'ActionOrderByWithRelationAndSearchRelevanceInput',
+        cursor: 'ActionWhereUniqueInput',
+        take: 'Int',
+        skip: 'Int',
+        distinct: 'ActionScalarFieldEnum',
+      },
+      resolve(root: any) {
+        return root.actions
+      },
+    })
     t.field('_count', {
       type: 'PhraseCountOutputType',
       resolve(root: any) {

@@ -1,16 +1,31 @@
 import { objectType } from 'nexus'
 
-export const Comment = objectType({
+export const PullRequest = objectType({
   nonNullDefaults: {
     output: true,
     input: false,
   },
-  name: 'Comment',
-  description: `词组-评论`,
+  name: 'PullRequest',
+  description: `词条-拉取请求`,
   definition(t) {
     t.int('id')
     t.field('createAt', { type: 'DateTime' })
     t.string('content')
+    t.field('user', {
+      type: 'User',
+      resolve(root: any) {
+        return root.user
+      },
+    })
+    t.int('userId')
+    t.field('action', {
+      type: 'Action',
+      resolve(root: any) {
+        return root.action
+      },
+    })
+    t.int('actionId')
+    t.field('status', { type: 'PullRequestStatus' })
     t.list.field('comments', {
       type: 'Comment',
       args: {
@@ -25,29 +40,8 @@ export const Comment = objectType({
         return root.comments
       },
     })
-    t.nullable.field('comment', {
-      type: 'Comment',
-      resolve(root: any) {
-        return root.comment
-      },
-    })
-    t.nullable.int('commentId')
-    t.nullable.field('phrase', {
-      type: 'Phrase',
-      resolve(root: any) {
-        return root.phrase
-      },
-    })
-    t.nullable.int('phraseId')
-    t.nullable.field('pullRequest', {
-      type: 'PullRequest',
-      resolve(root: any) {
-        return root.pullRequest
-      },
-    })
-    t.nullable.int('pullRequestId')
     t.field('_count', {
-      type: 'CommentCountOutputType',
+      type: 'PullRequestCountOutputType',
       resolve(root: any) {
         return root._count
       },
