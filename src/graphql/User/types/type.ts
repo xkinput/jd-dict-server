@@ -6,15 +6,15 @@ export enum UserRole {
   NORMAL = 'R:NORMAL',
 }
 
-export const UserLogin = objectType({
-  name: 'UserLogin',
+export const UserSignIn = objectType({
+  name: 'UserSignIn',
   definition(t) {
     t.string('token')
   }
 })
 
-export const UserLoginInput = inputObjectType({
-  name: 'UserLoginInput',
+export const UserSignInInput = inputObjectType({
+  name: 'UserSignInInput',
   definition(t) {
     t.nonNull.string('name')
     t.nonNull.string('password')

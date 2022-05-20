@@ -30,7 +30,7 @@ const ruleTree: PermissionsSchema = {
   },
   Mutation: {
     '*': deny,
-    login: allow,
+    signIn: allow,
     signUp: allow,
     addUserPermission: isCanPolicy(['userPermission', 'create']),
     createOneRole: isCanPolicy(['role', 'create']),

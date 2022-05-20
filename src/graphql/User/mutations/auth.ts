@@ -117,10 +117,10 @@ export const wechatSignIn = mutationField('wechatSignIn', {
 })
 */
 
-export const login = mutationField('login', {
-  type: 'UserLogin',
+export const signIn = mutationField('signIn', {
+  type: 'UserSignIn',
   args: {
-    data: nonNull('UserLoginInput')
+    data: nonNull('UserSignInInput')
   },
   async resolve (_parent, { data }, { prisma, ctx }) {
     const user = await prisma.user.findUnique({
@@ -178,7 +178,7 @@ export const signUp = mutationField('signUp', {
       password: string().min(6, '密码最少6位').max(30, '密码最大30位'),
     })
   }),
-  async resolve (_parent, { data }, { prisma, ctx, casbin }) {
+  async resolve (_parent, { data }, { prisma, ctx, casbin, select }) {
     if (!casbin?.e?.addGroupingPolicy) throw new ApolloError('请刷新后重试')
 
     const { password, name, ...otherData } = data
@@ -196,7 +196,8 @@ export const signUp = mutationField('signUp', {
         },
         signUpType: 'USERNAME',
         ...otherData
-      }
+      },
+      ...select,
     })
 
     await casbin.e.addRoleForUser(name, UserRole.NORMAL)
