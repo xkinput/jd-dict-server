@@ -12,15 +12,6 @@ generator erd {
   provider = "prisma-erd-generator"
 }
 
-/// 错误码
-/// A 账户类
-enum ErrorCode {
-  /// 账户名不能重复
-  A1000
-  /// 账户邮件不能重复
-  A1001
-}
-
 /// Casbin权限记录
 model CasbinRule {
   id    Int     @id @default(autoincrement())

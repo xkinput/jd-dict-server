@@ -1,23 +1,14 @@
 import { mutationField, nonNull } from 'nexus'
 import { compareSync, genSaltSync, hashSync } from 'bcrypt'
-import { User, UserStatus, Wechat } from '@prisma/client'
-import axios from 'axios'
+import { UserStatus } from '@prisma/client'
 import { sign } from 'jsonwebtoken'
 
-import { auth } from '@/api/wx'
 import { TOKEN_EXPIRE_TIME, } from '@/config/app'
 import { UserStatusData } from '../utils'
 import { ApolloError } from 'apollo-server-koa'
 import { UserRole } from '../types'
-import { SignUser } from '@/utils/user'
+import { ErrorCode } from '@/graphql/Error'
 
-interface Code2Session {
-  openid: string;
-  session_key: string;
-  unionid?: string;
-  errcode?: number;
-  errmsg?: string;
-}
 /*
 export const wechatSignIn = mutationField('wechatSignIn', {
   type: 'UserLogin',
@@ -184,6 +175,12 @@ export const signUp = mutationField('signUp', {
     const { password, name, ...otherData } = data
 
     const hashedPassword = password ? hashSync(password, genSaltSync(12)) : ''
+
+    if (await prisma.user.findUnique({
+      where: {
+        name
+      }
+    })) throw new ApolloError('登录名已存在', ErrorCode.U1000)
 
     const user = await prisma.user.create({
       data: {
