@@ -12,6 +12,10 @@ const ruleTree: PermissionsSchema = {
     '*': deny,
     findManyPhrase: allow,
     findUserMe: isAuthenticated,
+    findManyPullRequest: allow,
+    findManyPullRequestCount: allow,
+    findManyIssue: allow,
+    findManyIssueCount: allow,
     findUniqueUser: isCanPolicy(['user', 'read']),
     findUniqueRole: isCanPolicy(['role', 'read']),
     findUniquePermission: isCanPolicy(['permission', 'read']),
@@ -32,6 +36,7 @@ const ruleTree: PermissionsSchema = {
     '*': deny,
     signIn: allow,
     signUp: allow,
+    createOneIssue: isAuthenticated,
     addUserPermission: isCanPolicy(['userPermission', 'create']),
     createOneRole: isCanPolicy(['role', 'create']),
     createOnePermission: isCanPolicy(['permission', 'create']),
@@ -44,7 +49,6 @@ const ruleTree: PermissionsSchema = {
     deleteOnePermissionAction: isCanPolicy(['permissionAction', 'delete']),
     deleteOneUser: isCanPolicy(['user', 'delete']),
     deletePolicy: isCanPolicy(['userPermission', 'delete']),
-    createSubmitOnePhrase: isAuthenticated,
   },
 }
 

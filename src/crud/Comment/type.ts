@@ -40,13 +40,13 @@ export const Comment = objectType({
       },
     })
     t.nullable.int('phraseId')
-    t.nullable.field('pullRequest', {
-      type: 'PullRequest',
+    t.nullable.field('issue', {
+      type: 'Issue',
       resolve(root: any) {
-        return root.pullRequest
+        return root.issue
       },
     })
-    t.nullable.int('pullRequestId')
+    t.nullable.int('issueId')
     t.field('_count', {
       type: 'CommentCountOutputType',
       resolve(root: any) {

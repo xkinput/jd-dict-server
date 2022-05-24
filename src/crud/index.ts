@@ -1,5 +1,5 @@
+export * from './Issue'
 export * from './PullRequest'
-export * from './Action'
 export * from './Tag'
 export * from './PermissionAction'
 export * from './Permission'

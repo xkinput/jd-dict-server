@@ -1,5 +1,5 @@
 export * from './User'
 // export * from './Role'
 export * from './Permission'
-export * from './Phrase'
+export * from './Issue'
 export * from './Error'

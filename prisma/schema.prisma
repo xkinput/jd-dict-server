@@ -39,22 +39,21 @@ enum UserStatus {
 
 /// 用户
 model User {
-  id           Int           @id @default(autoincrement())
-  createAt     DateTime      @default(now())
-  updateAt     DateTime      @updatedAt
-  name         String?       @unique
-  nickname     String?
-  password     String?
-  phone        String?
-  status       UserStatus    @default(ENABLE)
-  roles        Role[]
-  signUpType   SignUpType    @default(WECHAT)
-  wechat       Wechat?       @relation(fields: [wechatId], references: [id], onDelete: Cascade)
-  wechatId     Int?          @unique
-  notices      Notice[]
-  phrases      Phrase[]
-  pullRequests PullRequest[]
-  actions      Action[]
+  id         Int        @id @default(autoincrement())
+  createAt   DateTime   @default(now())
+  updateAt   DateTime   @updatedAt
+  name       String?    @unique
+  nickname   String?
+  password   String?
+  phone      String?
+  status     UserStatus @default(ENABLE)
+  roles      Role[]
+  signUpType SignUpType @default(WECHAT)
+  wechat     Wechat?    @relation(fields: [wechatId], references: [id], onDelete: Cascade)
+  wechatId   Int?       @unique
+  notices    Notice[]
+  phrases    Phrase[]
+  issues     Issue[]
 }
 
 /// 词条类型
@@ -87,28 +86,28 @@ enum PhraseStatus {
 
 /// 词条
 model Phrase {
-  id       Int          @id @default(autoincrement())
-  createAt DateTime     @default(now())
-  updateAt DateTime     @updatedAt
+  id           Int           @id @default(autoincrement())
+  createAt     DateTime      @default(now())
+  updateAt     DateTime      @updatedAt
   /// 词条
-  word     String
+  word         String
   /// 编码
-  code     String
+  code         String
   /// 类型
-  type     PhraseType
+  type         PhraseType
   /// 词频
-  index    Int
+  index        Int
   /// 状态
-  status   PhraseStatus
+  status       PhraseStatus
   /// 评论
-  comments Comment[]
+  comments     Comment[]
   /// 发起人
-  user     User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   Int
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
   /// 标签
-  tags     Tag[]
-  /// 关联操作
-  actions  Action[]
+  tags         Tag[]
+  /// 关联PR
+  pullRequests PullRequest[]
 }
 
 /// 标签
@@ -123,21 +122,21 @@ model Tag {
 
 /// 词组-评论
 model Comment {
-  id            Int          @id @default(autoincrement())
-  createAt      DateTime     @default(now())
-  updateAt      DateTime     @updatedAt
-  content       String
-  comments      Comment[]    @relation("CommentToComment")
-  comment       Comment?     @relation("CommentToComment", fields: [commentId], references: [id])
-  commentId     Int?
-  phrase        Phrase?      @relation(fields: [phraseId], references: [id])
-  phraseId      Int?
-  pullRequest   PullRequest? @relation(fields: [pullRequestId], references: [id])
-  pullRequestId Int?
+  id        Int       @id @default(autoincrement())
+  createAt  DateTime  @default(now())
+  updateAt  DateTime  @updatedAt
+  content   String
+  comments  Comment[] @relation("CommentToComment")
+  comment   Comment?  @relation("CommentToComment", fields: [commentId], references: [id])
+  commentId Int?
+  phrase    Phrase?   @relation(fields: [phraseId], references: [id])
+  phraseId  Int?
+  issue     Issue?    @relation(fields: [issueId], references: [id])
+  issueId   Int?
 }
 
 /// 词条操作类型
-enum ActionType {
+enum PullRequestType {
   /// 创建
   Create
   /// 修改
@@ -146,22 +145,6 @@ enum ActionType {
   Move
   /// 删除
   Delete
-}
-
-/// 词条-操作
-/// 记录如何去调整一个词条
-model Action {
-  id           Int           @id @default(autoincrement())
-  createAt     DateTime      @default(now())
-  updateAt     DateTime      @updatedAt
-  phrase       Phrase        @relation(fields: [phraseId], references: [id])
-  phraseId     Int
-  word         String
-  code         String
-  user         User          @relation(fields: [userId], references: [id])
-  userId       Int
-  type         ActionType
-  pullRequests PullRequest[]
 }
 
 enum PullRequestStatus {
@@ -174,17 +157,32 @@ enum PullRequestStatus {
 }
 
 /// 词条-拉取请求
+/// 记录如何去调整一个词条
 model PullRequest {
   id       Int               @id @default(autoincrement())
   createAt DateTime          @default(now())
   updateAt DateTime          @updatedAt
-  content  String
-  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   Int
-  action   Action            @relation(fields: [actionId], references: [id])
-  actionId Int
-  status   PullRequestStatus
-  comments Comment[]
+  phrase   Phrase?           @relation(fields: [phraseId], references: [id])
+  phraseId Int?
+  word     String?
+  code     String?
+  index    Int?
+  type     PullRequestType
+  status   PullRequestStatus @default(Pending)
+  issue    Issue[]
+}
+
+/// 词条-发起讨论问题
+model Issue {
+  id           Int           @id @default(autoincrement())
+  createAt     DateTime      @default(now())
+  updateAt     DateTime      @updatedAt
+  content      String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
+  status       Boolean       @default(true)
+  pullRequests PullRequest[]
+  comments     Comment[]
 }
 
 /// 权限-角色

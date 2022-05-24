@@ -6,39 +6,36 @@ export const PullRequest = objectType({
     input: false,
   },
   name: 'PullRequest',
-  description: `词条-拉取请求`,
+  description: `词条-拉取请求
+记录如何去调整一个词条`,
   definition(t) {
     t.int('id')
     t.field('createAt', { type: 'DateTime' })
     t.field('updateAt', { type: 'DateTime' })
-    t.string('content')
-    t.field('user', {
-      type: 'User',
+    t.nullable.field('phrase', {
+      type: 'Phrase',
       resolve(root: any) {
-        return root.user
+        return root.phrase
       },
     })
-    t.int('userId')
-    t.field('action', {
-      type: 'Action',
-      resolve(root: any) {
-        return root.action
-      },
-    })
-    t.int('actionId')
+    t.nullable.int('phraseId')
+    t.nullable.string('word')
+    t.nullable.string('code')
+    t.nullable.int('index')
+    t.field('type', { type: 'PullRequestType' })
     t.field('status', { type: 'PullRequestStatus' })
-    t.list.field('comments', {
-      type: 'Comment',
+    t.list.field('issue', {
+      type: 'Issue',
       args: {
-        where: 'CommentWhereInput',
-        orderBy: 'CommentOrderByWithRelationAndSearchRelevanceInput',
-        cursor: 'CommentWhereUniqueInput',
+        where: 'IssueWhereInput',
+        orderBy: 'IssueOrderByWithRelationAndSearchRelevanceInput',
+        cursor: 'IssueWhereUniqueInput',
         take: 'Int',
         skip: 'Int',
-        distinct: 'CommentScalarFieldEnum',
+        distinct: 'IssueScalarFieldEnum',
       },
       resolve(root: any) {
-        return root.comments
+        return root.issue
       },
     })
     t.field('_count', {

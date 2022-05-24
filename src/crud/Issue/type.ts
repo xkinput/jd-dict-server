@@ -1,26 +1,17 @@
 import { objectType } from 'nexus'
 
-export const Action = objectType({
+export const Issue = objectType({
   nonNullDefaults: {
     output: true,
     input: false,
   },
-  name: 'Action',
-  description: `词条-操作
-记录如何去调整一个词条`,
+  name: 'Issue',
+  description: `词条-发起讨论问题`,
   definition(t) {
     t.int('id')
     t.field('createAt', { type: 'DateTime' })
     t.field('updateAt', { type: 'DateTime' })
-    t.field('phrase', {
-      type: 'Phrase',
-      resolve(root: any) {
-        return root.phrase
-      },
-    })
-    t.int('phraseId')
-    t.string('word')
-    t.string('code')
+    t.string('content')
     t.field('user', {
       type: 'User',
       resolve(root: any) {
@@ -28,7 +19,7 @@ export const Action = objectType({
       },
     })
     t.int('userId')
-    t.field('type', { type: 'ActionType' })
+    t.boolean('status')
     t.list.field('pullRequests', {
       type: 'PullRequest',
       args: {
@@ -43,8 +34,22 @@ export const Action = objectType({
         return root.pullRequests
       },
     })
+    t.list.field('comments', {
+      type: 'Comment',
+      args: {
+        where: 'CommentWhereInput',
+        orderBy: 'CommentOrderByWithRelationAndSearchRelevanceInput',
+        cursor: 'CommentWhereUniqueInput',
+        take: 'Int',
+        skip: 'Int',
+        distinct: 'CommentScalarFieldEnum',
+      },
+      resolve(root: any) {
+        return root.comments
+      },
+    })
     t.field('_count', {
-      type: 'ActionCountOutputType',
+      type: 'IssueCountOutputType',
       resolve(root: any) {
         return root._count
       },

@@ -54,19 +54,19 @@ export const Phrase = objectType({
         return root.tags
       },
     })
-    t.list.field('actions', {
-      description: '关联操作',
-      type: 'Action',
+    t.list.field('pullRequests', {
+      description: '关联PR',
+      type: 'PullRequest',
       args: {
-        where: 'ActionWhereInput',
-        orderBy: 'ActionOrderByWithRelationAndSearchRelevanceInput',
-        cursor: 'ActionWhereUniqueInput',
+        where: 'PullRequestWhereInput',
+        orderBy: 'PullRequestOrderByWithRelationAndSearchRelevanceInput',
+        cursor: 'PullRequestWhereUniqueInput',
         take: 'Int',
         skip: 'Int',
-        distinct: 'ActionScalarFieldEnum',
+        distinct: 'PullRequestScalarFieldEnum',
       },
       resolve(root: any) {
-        return root.actions
+        return root.pullRequests
       },
     })
     t.field('_count', {

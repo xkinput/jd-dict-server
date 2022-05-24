@@ -65,32 +65,18 @@ export const User = objectType({
         return root.phrases
       },
     })
-    t.list.field('pullRequests', {
-      type: 'PullRequest',
+    t.list.field('issues', {
+      type: 'Issue',
       args: {
-        where: 'PullRequestWhereInput',
-        orderBy: 'PullRequestOrderByWithRelationAndSearchRelevanceInput',
-        cursor: 'PullRequestWhereUniqueInput',
+        where: 'IssueWhereInput',
+        orderBy: 'IssueOrderByWithRelationAndSearchRelevanceInput',
+        cursor: 'IssueWhereUniqueInput',
         take: 'Int',
         skip: 'Int',
-        distinct: 'PullRequestScalarFieldEnum',
+        distinct: 'IssueScalarFieldEnum',
       },
       resolve(root: any) {
-        return root.pullRequests
-      },
-    })
-    t.list.field('actions', {
-      type: 'Action',
-      args: {
-        where: 'ActionWhereInput',
-        orderBy: 'ActionOrderByWithRelationAndSearchRelevanceInput',
-        cursor: 'ActionWhereUniqueInput',
-        take: 'Int',
-        skip: 'Int',
-        distinct: 'ActionScalarFieldEnum',
-      },
-      resolve(root: any) {
-        return root.actions
+        return root.issues
       },
     })
     t.field('_count', {
