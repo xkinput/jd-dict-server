@@ -16,6 +16,8 @@ const ruleTree: PermissionsSchema = {
     findManyPullRequestCount: allow,
     findManyIssue: allow,
     findManyIssueCount: allow,
+    findManyTag: isAuthenticated,
+    findManyTagCount: isAuthenticated,
     findUniqueUser: isCanPolicy(['user', 'read']),
     findUniqueRole: isCanPolicy(['role', 'read']),
     findUniquePermission: isCanPolicy(['permission', 'read']),
