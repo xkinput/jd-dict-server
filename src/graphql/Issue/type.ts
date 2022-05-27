@@ -16,9 +16,9 @@ export const IssueUserCreateInput = inputObjectType({
 export const IssuePullReqeustUserInput = inputObjectType({
   name: 'IssuePullReqeustUserInput',
   definition(t) {
-    t.nonNull.field('type', {
+    t.nonNull.field('pullRequestType', {
       type: 'PullRequestType',
-      description: 'PR操作行为'
+      description: 'PR操作行为',
     })
     t.string('word', {
       description: '词条'
@@ -28,6 +28,14 @@ export const IssuePullReqeustUserInput = inputObjectType({
     })
     t.int('index', {
       description: '排序值'
+    })
+    t.field('phraseType', {
+      type: 'PhraseType',
+      description: '词条类型'
+    })
+    t.field('tags', {
+      type: list('TagWhereUniqueInput'),
+      description: '标签类'
     })
     t.int('phraseId', {
       description: '原词条ID，若为新建，则忽略'

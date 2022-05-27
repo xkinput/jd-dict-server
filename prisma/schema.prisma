@@ -108,6 +108,8 @@ model Phrase {
   tags         Tag[]
   /// 关联PR
   pullRequests PullRequest[]
+
+  @@unique([word, id])
 }
 
 /// 标签

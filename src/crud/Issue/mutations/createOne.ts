@@ -1,4 +1,4 @@
-import { PrismaClient, PullRequestType } from '@prisma/client'
+import { PhraseStatus, PhraseType, PrismaClient, PullRequestType } from '@prisma/client'
 import { ApolloError } from 'apollo-server-koa'
 import { mutationField, nonNull } from 'nexus'
 
@@ -9,47 +9,74 @@ import { NexusGenInputs } from '@/generated/nexus'
 type Pr = NexusGenInputs['IssueUserCreateInput']['pullRequests'][number]
 async function validPrInputType(pr: Pr, errors: ApolloError[], prisma: PrismaClient) {
   // 非创建时，原词条必选
-  if (pr.type !== 'Create' && !pr.phraseId) {
+  if (pr.pullRequestType !== 'Create' && !pr.phraseId) {
     errors.push(new ApolloError(`PhraseId is required data:{${entriesObjectStringify(pr)}}`, ErrorCode.PR1000))
   } else if (pr.phraseId) {
-    if (await prisma.phrase.count({ where: { id: pr.phraseId } }) === 0) errors.push(new ApolloError(`Phrase is not exists data:{${entriesObjectStringify(pr)}}`, ErrorCode.PH1000))
+    if (await prisma.phrase.count({ where: { id: pr.phraseId } }) === 0) errors.push(new ApolloError(`Phrase is not exists ${pr.word}`, ErrorCode.PH1000, {
+      pr
+    }))
   }
 
   // 创建时，词条与编码都为必填
-  if ('Create' === pr.type) {
-    if (!pr.word || !pr.code) errors.push(new ApolloError(`Word and Code is required data:{${entriesObjectStringify(pr)}}`, ErrorCode.PR1001))
+  if ('Create' === pr.pullRequestType) {
+    if (!pr.word || !pr.code || !pr.phraseType) errors.push(new ApolloError(`Word and Code and phraseType is required ${pr.word}`, ErrorCode.PR1001, {
+      pr
+    }))
   }
 
+  if (await prisma.phrase.count({ where: { id: pr.phraseId } }) === 0) errors.push(new ApolloError(`Phrase is not exist id: ${pr.phraseId}`, ErrorCode.PH1000, {
+    pr
+  }))
+
   // 创建或修改时，词条或编码必填一项
-  if ((['Create', 'Change'] as PullRequestType[]).includes(pr.type)) {
-    if (!pr.word && !pr.code) errors.push(new ApolloError(`Word or Code required one optional data:{${entriesObjectStringify(pr)}}`, ErrorCode.PR1002))
+  if ((['Create', 'Change'] as PullRequestType[]).includes(pr.pullRequestType)) {
+    if (!pr.word && !pr.code) errors.push(new ApolloError(`Word or Code required one optional ${pr.word}`, ErrorCode.PR1002, {
+      pr
+    }))
+  }
+
+  // 修改时 不能完全与原词相同
+  if (pr.pullRequestType === 'Change') {
+    let phrase = await prisma.phrase.findUnique({ where: { id: pr.phraseId } })
+    if (phrase.word === pr.word && phrase.code === pr.code && phrase.index === pr.index) errors.push(new ApolloError('PR is dont equal as original phrase', ErrorCode.PR1005, {
+      pr
+    }))
   }
 
   // 移动时排序值必填
-  if ((['Move'] as PullRequestType[]).includes(pr.type)) {
-    if (!pr.index) errors.push(new ApolloError(`Index is required ${JSON.stringify(pr)}`, ErrorCode.PR1003))
+  if ((['Move'] as PullRequestType[]).includes(pr.pullRequestType)) {
+    if (!pr.index) errors.push(new ApolloError(`Index is required ${pr.word}`, ErrorCode.PR1003, {
+      pr
+    }))
   }
 }
 
 /**存在相同词条或PR */
 async function validExistCreatePhOrPr(pr: Pr, prisma: PrismaClient) {
-  if (pr.type === 'Create') {
-    let phraseCount = await prisma.phrase.count({
-      where: {
-        word: pr.word,
-        code: pr.code,
-      }
-    })
-    if (phraseCount > 0) throw new ApolloError(`Phrase is exists data:{${entriesObjectStringify(pr)}}`, ErrorCode.PH1001)
+  let phrase = await prisma.phrase.findFirst({
+    where: {
+      word: pr.word,
+      code: pr.code,
+      type: pr.phraseType
+    }
+  })
 
-    let prCount = await prisma.pullRequest.count({
-      where: {
-        word: pr.word,
-        code: pr.code,
-      }
-    })
-    if (prCount > 0) throw new ApolloError(`PullRequest is exists data:{${entriesObjectStringify(pr)}}`, ErrorCode.PR1004)
-  }
+  if (phrase) throw new ApolloError(`Phrase is exists id: ${phrase.id} ${pr.word}`, ErrorCode.PH1001, {
+    pr
+  })
+
+  let pullRequest = await prisma.pullRequest.findFirst({
+    where: {
+      word: pr.word,
+      code: pr.code,
+      type: pr.pullRequestType,
+      status: 'Pending'
+    }
+  })
+
+  if (pullRequest) throw new ApolloError(`pullRequest is exists id: ${pullRequest.id} ${pr.word}`, ErrorCode.PR1004, {
+    pr
+  })
 }
 
 export const IssueCreateOneMutation = mutationField('createOneIssue', {
@@ -57,9 +84,7 @@ export const IssueCreateOneMutation = mutationField('createOneIssue', {
   args: {
     data: nonNull('IssueUserCreateInput'),
   },
-  async resolve(_parent, { data }, { prisma, select, ctx }) {
-    const myUserId = ctx.state.user.id
-
+  validate: async (_, { data }, { prisma }) => {
     let errors: ApolloError[] = []
 
     for (let pr of data.pullRequests) {
@@ -70,15 +95,41 @@ export const IssueCreateOneMutation = mutationField('createOneIssue', {
     if (errors.length > 0) throw new ApolloError(errors.join(', '), ErrorCode.PR2000, {
       errors,
     })
+  },
+  resolve(_parent, { data }, { prisma, select, ctx }) {
+    const myUserId = ctx.state.user.id
 
     return prisma.issue.create({
       data: {
         content: data.content,
         pullRequests: {
-          create: data.pullRequests.map(it => ({
-            ...it,
-            index: it.index ?? 0,
-          })),
+          create: data.pullRequests.map(it => {
+            const { phraseType, pullRequestType, phraseId, ...fields } = it
+            return {
+              ...fields,
+              type: pullRequestType,
+              index: it.index ?? 0,
+              phrase: {
+                ...(pullRequestType === 'Create' ? {
+                  create: {
+                    word: it.word,
+                    code: it.code,
+                    type: it.phraseType,
+                    index: it.index ?? 0,
+                    status: PhraseStatus.Draft,
+                    userId: myUserId,
+                    tags: {
+                      connect: it.tags
+                    }
+                  }
+                } : {
+                  connect: {
+                    id: phraseId
+                  }
+                })
+              },
+            }
+          }),
         },
         user: {
           connect: {
