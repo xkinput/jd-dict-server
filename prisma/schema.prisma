@@ -109,7 +109,7 @@ model Phrase {
   /// 关联PR
   pullRequests PullRequest[]
 
-  @@unique([word, id])
+  @@unique([word, code])
 }
 
 /// 标签
@@ -143,8 +143,6 @@ enum PullRequestType {
   Create
   /// 修改
   Change
-  /// 移动优先级
-  Move
   /// 删除
   Delete
 }

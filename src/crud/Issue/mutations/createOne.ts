@@ -1,51 +1,66 @@
-import { PhraseStatus, PhraseType, PrismaClient, PullRequestType } from '@prisma/client'
+import { Phrase, PhraseStatus, PhraseType, PrismaClient, PullRequestType } from '@prisma/client'
 import { ApolloError } from 'apollo-server-koa'
 import { mutationField, nonNull } from 'nexus'
 
 import { entriesObjectStringify } from '@/utils/tools'
 import { ErrorCode, IssueUserCreateInput } from '@/graphql'
 import { NexusGenInputs } from '@/generated/nexus'
+import { some } from 'lodash'
 
 type Pr = NexusGenInputs['IssueUserCreateInput']['pullRequests'][number]
-async function validPrInputType(pr: Pr, errors: ApolloError[], prisma: PrismaClient) {
+async function validPrInputType(pr: Pr, prs: Pr[],  errors: ApolloError[], prisma: PrismaClient) {
   // 非创建时，原词条必选
   if (pr.pullRequestType !== 'Create' && !pr.phraseId) {
     errors.push(new ApolloError(`PhraseId is required data:{${entriesObjectStringify(pr)}}`, ErrorCode.PR1000))
   } else if (pr.phraseId) {
     if (await prisma.phrase.count({ where: { id: pr.phraseId } }) === 0) errors.push(new ApolloError(`Phrase is not exists ${pr.word}`, ErrorCode.PH1000, {
-      pr
+      pr,
+      args: [pr.word]
     }))
   }
 
-  // 创建时，词条与编码都为必填
-  if ('Create' === pr.pullRequestType) {
+  if (pr.pullRequestType === 'Create') {
+    // 创建时，词条与编码都为必填
     if (!pr.word || !pr.code || !pr.phraseType) errors.push(new ApolloError(`Word and Code and phraseType is required ${pr.word}`, ErrorCode.PR1001, {
-      pr
+      pr,
+      args: [pr.word]
     }))
-  }
+
 
   // 创建或修改时，词条或编码必填一项
-  if ((['Create', 'Change'] as PullRequestType[]).includes(pr.pullRequestType)) {
     if (!pr.word && !pr.code) errors.push(new ApolloError(`Word or Code required one optional ${pr.word}`, ErrorCode.PR1002, {
-      pr
+      pr,
+      args: [pr.word]
     }))
   }
 
-  // 修改时 不能完全与原词相同
   if (pr.pullRequestType === 'Change') {
+    // 修改时 词条和排序值不能与原词相同
     let phrase = await prisma.phrase.findUnique({ where: { id: pr.phraseId } })
-    if (phrase.word === pr.word && phrase.code === pr.code && phrase.index === pr.index) errors.push(new ApolloError('PR is dont equal as original phrase', ErrorCode.PR1005, {
-      pr
+    if ((pr.word ? phrase.word === pr.word : true)
+        && (pr.code ? phrase.code === pr.code : true)
+        && (pr.index ? phrase.index === pr.index : true)
+      ) errors.push(new ApolloError('PR is dont equal as original phrase', ErrorCode.PR1005, {
+      pr,
+      args: [pr.word]
     }))
-  }
 
-  // 移动时排序值必填
-  if ((['Move'] as PullRequestType[]).includes(pr.pullRequestType)) {
-    if (!pr.index) errors.push(new ApolloError(`Index is required ${pr.word}`, ErrorCode.PR1003, {
-      pr
+    // 修改时修改到的编码位置是否已有词条
+    phrase = await prisma.phrase.findFirst({ where: { code: pr.code, status: 'Finish' } })
+    if (phrase && !someChangeOriginalPhrase(phrase, pr, prs, prisma)) errors.push(new ApolloError(`Code is exists of phrase  but original phrase not action id: ${phrase.id} code: ${pr.code}`, ErrorCode.PH1000, {
+      pr,
+      args: [pr.code, phrase.id]
     }))
   }
 }
+
+function someChangeOriginalPhrase(phrase: Phrase, pr: Pr, prs: Pr[], prisma: PrismaClient) {
+  return prs
+  .filter(it => ['Change', 'Delete'].includes(it.pullRequestType))
+  .some(it => it.phraseId === phrase.id)
+}
+
+
 
 /**存在相同词条或PR */
 async function validExistCreatePhOrPr(pr: Pr, prisma: PrismaClient) {
@@ -57,6 +72,7 @@ async function validExistCreatePhOrPr(pr: Pr, prisma: PrismaClient) {
     }
   })
 
+  // 不能重复创建相同词条编码类型的词条
   if (phrase) throw new ApolloError(`Phrase is exists id: ${phrase.id} ${pr.word}`, ErrorCode.PH1001, {
     pr
   })
@@ -84,7 +100,7 @@ export const IssueCreateOneMutation = mutationField('createOneIssue', {
     let errors: ApolloError[] = []
 
     for (let pr of data.pullRequests) {
-      await validPrInputType(pr, errors, prisma)
+      await validPrInputType(pr, data.pullRequests, errors, prisma)
       await validExistCreatePhOrPr(pr, prisma)
     }
 
@@ -100,7 +116,7 @@ export const IssueCreateOneMutation = mutationField('createOneIssue', {
         content: data.content,
         pullRequests: {
           create: data.pullRequests.map(it => {
-            const { phraseType, pullRequestType, phraseId, tags, ...fields } = it
+            const { phraseType, pullRequestType, phraseId, _prIndex, tags, ...fields } = it
             return {
               ...fields,
               type: pullRequestType,

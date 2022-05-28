@@ -40,5 +40,8 @@ export const IssuePullReqeustUserInput = inputObjectType({
     t.int('phraseId', {
       description: '原词条ID，若为新建，则忽略'
     })
+    t.int('_prIndex', {
+      description: '辅助返回错误信息编号'
+    })
   }
 })
