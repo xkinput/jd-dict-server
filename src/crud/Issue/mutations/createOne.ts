@@ -24,10 +24,6 @@ async function validPrInputType(pr: Pr, errors: ApolloError[], prisma: PrismaCli
     }))
   }
 
-  if (await prisma.phrase.count({ where: { id: pr.phraseId } }) === 0) errors.push(new ApolloError(`Phrase is not exist id: ${pr.phraseId}`, ErrorCode.PH1000, {
-    pr
-  }))
-
   // 创建或修改时，词条或编码必填一项
   if ((['Create', 'Change'] as PullRequestType[]).includes(pr.pullRequestType)) {
     if (!pr.word && !pr.code) errors.push(new ApolloError(`Word or Code required one optional ${pr.word}`, ErrorCode.PR1002, {
@@ -92,7 +88,7 @@ export const IssueCreateOneMutation = mutationField('createOneIssue', {
       await validExistCreatePhOrPr(pr, prisma)
     }
 
-    if (errors.length > 0) throw new ApolloError(errors.join(', '), ErrorCode.PR2000, {
+    if (errors.length > 0) throw new ApolloError(errors.join(', '), ErrorCode.MU1000, {
       errors,
     })
   },
@@ -104,7 +100,7 @@ export const IssueCreateOneMutation = mutationField('createOneIssue', {
         content: data.content,
         pullRequests: {
           create: data.pullRequests.map(it => {
-            const { phraseType, pullRequestType, phraseId, ...fields } = it
+            const { phraseType, pullRequestType, phraseId, tags, ...fields } = it
             return {
               ...fields,
               type: pullRequestType,
