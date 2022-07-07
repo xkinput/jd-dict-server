@@ -5,6 +5,10 @@
 // "TypeError: Do not know how to serialize a BigInt"
 /* global BigInt:writable */
 /* eslint no-extend-native: ["error", { "exceptions": ["BigInt"] }] */
+declare interface BigInt {
+  toJSON: Function
+}
+
 BigInt.prototype.toJSON = function () {
   return this.toString()
 }
