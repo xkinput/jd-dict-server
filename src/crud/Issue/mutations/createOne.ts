@@ -1,11 +1,10 @@
-import { Phrase, PhraseStatus, PhraseType, PrismaClient, PullRequestType } from '@prisma/client'
+import { Phrase, PhraseStatus, PrismaClient, PullRequestType } from '@prisma/client'
 import { ApolloError } from 'apollo-server-koa'
 import { mutationField, nonNull } from 'nexus'
 
 import { entriesObjectStringify } from '@/utils/tools'
 import { ErrorCode, IssueUserCreateInput } from '@/graphql'
 import { NexusGenInputs } from '@/generated/nexus'
-import { some } from 'lodash'
 
 type Pr = NexusGenInputs['IssueUserCreateInput']['pullRequests'][number]
 async function validPrInputType(pr: Pr, prs: Pr[],  errors: ApolloError[], prisma: PrismaClient) {
@@ -59,8 +58,6 @@ function someChangeOriginalPhrase(phrase: Phrase, pr: Pr, prs: Pr[], prisma: Pri
   .filter(it => ['Change', 'Delete'].includes(it.pullRequestType))
   .some(it => it.phraseId === phrase.id)
 }
-
-
 
 /**存在相同词条或PR */
 async function validExistCreatePhOrPr(pr: Pr, prisma: PrismaClient) {

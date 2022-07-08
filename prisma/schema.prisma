@@ -8,10 +8,6 @@ generator client {
   previewFeatures = ["fullTextSearch", "extendedIndexes"]
 }
 
-generator erd {
-  provider = "prisma-erd-generator"
-}
-
 /// Casbin权限记录
 model CasbinRule {
   id    Int     @id @default(autoincrement())

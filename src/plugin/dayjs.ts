@@ -30,6 +30,6 @@ if (process.env.NODE_ENV === 'development') {
   dayjs.extend(devHelper)
 }
 
-dayjs.tz.setDefault("Asia/Shanghai")
+dayjs.tz.setDefault('Asia/Shanghai')
 
 export default dayjs
