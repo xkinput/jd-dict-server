@@ -16,6 +16,7 @@
     "studio": "prisma studio"
   },
   "dependencies": {
+    "@koa/cors": "^3.3.0",
     "@paljs/nexus": "4.1.0",
     "@paljs/plugins": "^4.1.0",
     "@prisma/client": "3.14.0",

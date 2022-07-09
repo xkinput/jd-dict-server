@@ -1,4 +1,5 @@
 import Koa from 'koa'
+import cors from '@koa/cors'
 import koaJwt from 'koa-jwt'
 import { ApolloServer } from 'apollo-server-koa'
 import { ApolloServerPluginLandingPageDisabled } from 'apollo-server-core'
@@ -20,6 +21,8 @@ import { prisma } from './context'
 
 async function start() {
   const app = new Koa()
+  
+  app.use(cors())
 
   app.use(
     graphqlUploadKoa({
