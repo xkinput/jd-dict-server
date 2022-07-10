@@ -33,16 +33,29 @@ async function validPrInputType(pr: Pr, prs: Pr[],  errors: ApolloError[], prism
     }))
   }
 
-  if (pr.pullRequestType === 'Change') {
+  if (pr.pullRequestType === 'Change' && pr.phraseId) {
+
+    if (!pr.word && !pr.code && !pr.index) {
+      errors.push(new ApolloError('PR change is required one option', ErrorCode.PR1006, {
+        pr,
+        args: [pr.word]
+      }))
+    }
+
     // 修改时 词条和排序值不能与原词相同
     let phrase = await prisma.phrase.findUnique({ where: { id: pr.phraseId } })
-    if ((pr.word ? phrase.word === pr.word : true)
+    if ((
+        (pr.word ? phrase.word === pr.word : true)
         && (pr.code ? phrase.code === pr.code : true)
         && (pr.index ? phrase.index === pr.index : true)
-      ) errors.push(new ApolloError('PR is dont equal as original phrase', ErrorCode.PR1005, {
-      pr,
-      args: [pr.word]
-    }))
+      )
+        && (pr.word || pr.code || pr.index)
+    ) {
+      errors.push(new ApolloError('PR change is dont equal as original phrase', ErrorCode.PR1005, {
+        pr,
+        args: [pr.word]
+      }))
+    }
 
     // 修改时修改到的编码位置是否已有词条
     phrase = await prisma.phrase.findFirst({ where: { code: pr.code, status: 'Finish' } })
@@ -75,6 +88,9 @@ async function validExistCreatePhOrPr(pr: Pr, prisma: PrismaClient) {
   })
 
   let pullRequest = await prisma.pullRequest.findFirst({
+    include: {
+      issue: true,
+    },
     where: {
       word: pr.word,
       code: pr.code,
@@ -84,7 +100,8 @@ async function validExistCreatePhOrPr(pr: Pr, prisma: PrismaClient) {
   })
 
   if (pullRequest) throw new ApolloError(`pullRequest is exists id: ${pullRequest.id} ${pr.word}`, ErrorCode.PR1004, {
-    pr
+    pr,
+    exist: pullRequest,
   })
 }
 
