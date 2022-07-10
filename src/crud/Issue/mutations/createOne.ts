@@ -34,7 +34,6 @@ async function validPrInputType(pr: Pr, prs: Pr[],  errors: ApolloError[], prism
   }
 
   if (pr.pullRequestType === 'Change' && pr.phraseId) {
-
     if (!pr.word && !pr.code && !pr.index) {
       errors.push(new ApolloError('PR change is required one option', ErrorCode.PR1006, {
         pr,
@@ -59,10 +58,28 @@ async function validPrInputType(pr: Pr, prs: Pr[],  errors: ApolloError[], prism
 
     // 修改时修改到的编码位置是否已有词条
     phrase = await prisma.phrase.findFirst({ where: { code: pr.code, status: 'Finish' } })
-    if (phrase && !someChangeOriginalPhrase(phrase, pr, prs, prisma)) errors.push(new ApolloError(`Code is exists of phrase  but original phrase not action id: ${phrase.id} code: ${pr.code}`, ErrorCode.PH1000, {
-      pr,
-      args: [pr.code, phrase.id]
-    }))
+    if (phrase && !someChangeOriginalPhrase(phrase, pr, prs, prisma)) {
+      errors.push(new ApolloError(`Code is exists of phrase  but original phrase not action id: ${phrase.id} code: ${pr.code}`, ErrorCode.PH1000, {
+        pr,
+        args: [pr.code, phrase.id]
+      }))
+    }
+  }
+
+  if (pr.pullRequestType === 'Delete' && pr.phraseId) {
+    let existPr = await prisma.pullRequest.findFirst({
+      where: {
+        phraseId: pr.phraseId,
+        type: 'Delete'
+      }
+    })
+
+    if (existPr) {
+      errors.push(new ApolloError(`Pr is exists id: ${existPr.id}`, ErrorCode.PR1004, {
+        pr,
+        exist: existPr
+      }))
+    }
   }
 }
 
@@ -78,13 +95,13 @@ async function validExistCreatePhOrPr(pr: Pr, prisma: PrismaClient) {
     where: {
       word: pr.word,
       code: pr.code,
-      type: pr.phraseType
     }
   })
 
   // 不能重复创建相同词条编码类型的词条
   if (phrase) throw new ApolloError(`Phrase is exists id: ${phrase.id} ${pr.word}`, ErrorCode.PH1001, {
-    pr
+    pr,
+    exist: phrase,
   })
 
   let pullRequest = await prisma.pullRequest.findFirst({
