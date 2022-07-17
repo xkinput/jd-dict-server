@@ -7,6 +7,7 @@ import { ErrorCode, IssueUserCreateInput } from '@/graphql'
 import { NexusGenInputs } from '@/generated/nexus'
 
 type Pr = NexusGenInputs['IssueUserCreateInput']['pullRequests'][number]
+
 async function validPrInputType(pr: Pr, prs: Pr[],  errors: ApolloError[], prisma: PrismaClient) {
   // 非创建时，原词条必选
   if (pr.pullRequestType !== 'Create' && !pr.phraseId) {

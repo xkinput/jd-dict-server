@@ -1,6 +1,6 @@
 import { queryField, list, nonNull } from 'nexus'
 
-export const UserMeQuery = queryField('findUserMe', {
+export const findUserMe = queryField('findUserMe', {
   type: 'User',
   resolve(_parent, args, { prisma, select, ctx }) {
     return prisma.user.findFirst({

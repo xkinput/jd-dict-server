@@ -10,7 +10,8 @@ import https from 'https'
 import jwt from 'jsonwebtoken'
 import { execute, subscribe } from 'graphql'
 import { applyMiddleware } from 'graphql-middleware'
-import { SubscriptionServer } from 'subscriptions-transport-ws'
+import { WebSocketServer } from 'ws'
+import { useServer } from 'graphql-ws/lib/use/ws'
 
 import '@/env'
 import { createContext } from './context'
@@ -68,19 +69,14 @@ async function start() {
   await apolloServer.start()
   apolloServer.applyMiddleware({ app })
 
-  SubscriptionServer.create(
-    {
-      schema, execute, subscribe,
-      async onConnect(connectionParams, webSocket) {
-        if (connectionParams.authorization) {
-          let user = jwt.decode(connectionParams.authorization)
-          return { ctx: { state: { user } }, prisma }
-        }
-        throw new Error('未找到Token')
-      },
-    },
-    { server: httpServer, path: '/subscriptions' }
-  )
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/subscriptions'
+  })
+
+  const serverCleanup = useServer({
+    schema, execute, subscribe
+  }, wsServer)
 
   httpServer.listen(APP_PORT, '0.0.0.0')
 
