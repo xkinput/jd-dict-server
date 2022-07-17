@@ -18,7 +18,6 @@ import { createContext } from './context'
 import { schema } from './nexusSchema'
 import { APP_PORT } from './config/keys'
 import { permissions } from './shield/permissions'
-import { prisma } from './context'
 
 async function start() {
   const app = new Koa()
