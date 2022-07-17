@@ -42,6 +42,7 @@ const ruleTree: PermissionsSchema = {
     signIn: allow,
     signUp: allow,
     createOneIssue: isAuthenticated,
+    toggleLikePr: isAuthenticated,
     addUserPermission: isCanPolicy(['userPermission', 'create']),
     createOneRole: isCanPolicy(['role', 'create']),
     createOnePermission: isCanPolicy(['permission', 'create']),

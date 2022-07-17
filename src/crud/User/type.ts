@@ -79,6 +79,20 @@ export const User = objectType({
         return root.issues
       },
     })
+    t.list.field('likePullReqeusts', {
+      type: 'PullRequest',
+      args: {
+        where: 'PullRequestWhereInput',
+        orderBy: 'PullRequestOrderByWithRelationAndSearchRelevanceInput',
+        cursor: 'PullRequestWhereUniqueInput',
+        take: 'Int',
+        skip: 'Int',
+        distinct: 'PullRequestScalarFieldEnum',
+      },
+      resolve(root: any) {
+        return root.likePullReqeusts
+      },
+    })
     t.field('_count', {
       type: 'UserCountOutputType',
       resolve(root: any) {

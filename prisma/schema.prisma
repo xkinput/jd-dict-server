@@ -35,21 +35,22 @@ enum UserStatus {
 
 /// 用户
 model User {
-  id         Int        @id @default(autoincrement())
-  createAt   DateTime   @default(now())
-  updateAt   DateTime   @updatedAt
-  name       String?    @unique
-  nickname   String?
-  password   String?
-  phone      String?
-  status     UserStatus @default(ENABLE)
-  roles      Role[]
-  signUpType SignUpType @default(WECHAT)
-  wechat     Wechat?    @relation(fields: [wechatId], references: [id], onDelete: Cascade)
-  wechatId   Int?       @unique
-  notices    Notice[]
-  phrases    Phrase[]
-  issues     Issue[]
+  id               Int           @id @default(autoincrement())
+  createAt         DateTime      @default(now())
+  updateAt         DateTime      @updatedAt
+  name             String?       @unique
+  nickname         String?
+  password         String?
+  phone            String?
+  status           UserStatus    @default(ENABLE)
+  roles            Role[]
+  signUpType       SignUpType    @default(WECHAT)
+  wechat           Wechat?       @relation(fields: [wechatId], references: [id], onDelete: Cascade)
+  wechatId         Int?          @unique
+  notices          Notice[]
+  phrases          Phrase[]
+  issues           Issue[]
+  likePullReqeusts PullRequest[]
 }
 
 /// 词条类型
@@ -166,6 +167,7 @@ model PullRequest {
   type     PullRequestType
   status   PullRequestStatus @default(Pending)
   issue    Issue[]
+  likes    User[]
 }
 
 /// 词条-发起讨论问题
