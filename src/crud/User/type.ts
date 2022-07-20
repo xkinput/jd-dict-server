@@ -93,6 +93,20 @@ export const User = objectType({
         return root.likePullReqeusts
       },
     })
+    t.list.field('dislikePullReqeusts', {
+      type: 'PullRequest',
+      args: {
+        where: 'PullRequestWhereInput',
+        orderBy: 'PullRequestOrderByWithRelationAndSearchRelevanceInput',
+        cursor: 'PullRequestWhereUniqueInput',
+        take: 'Int',
+        skip: 'Int',
+        distinct: 'PullRequestScalarFieldEnum',
+      },
+      resolve(root: any) {
+        return root.dislikePullReqeusts
+      },
+    })
     t.field('_count', {
       type: 'UserCountOutputType',
       resolve(root: any) {

@@ -52,6 +52,20 @@ export const PullRequest = objectType({
         return root.likes
       },
     })
+    t.list.field('dislikes', {
+      type: 'User',
+      args: {
+        where: 'UserWhereInput',
+        orderBy: 'UserOrderByWithRelationAndSearchRelevanceInput',
+        cursor: 'UserWhereUniqueInput',
+        take: 'Int',
+        skip: 'Int',
+        distinct: 'UserScalarFieldEnum',
+      },
+      resolve(root: any) {
+        return root.dislikes
+      },
+    })
     t.field('_count', {
       type: 'PullRequestCountOutputType',
       resolve(root: any) {

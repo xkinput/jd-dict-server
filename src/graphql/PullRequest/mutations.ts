@@ -1,29 +1,93 @@
 import { mutationField, nonNull } from 'nexus'
-export const toggleLikePr = mutationField('toggleLikePr', {
+
+export const togglePullRequestEvaluation = mutationField('togglePullRequestEvaluation', {
+  type: nonNull('PullRequest'),
+  args: {
+    where: nonNull('PullRequestWhereUniqueInput'),
+    data: nonNull('PullRequestEvaluationData')
+  },
+  description: '赞PR',
+  async resolve(_parnet, { where, data }, { prisma, ctx, select }) {
+    const pr = await prisma.pullRequest.findUnique({
+      where,
+      rejectOnNotFound: true,
+    })
+
+    const ctxUserId = ctx.state.user.id
+
+    const liked = await prisma.pullRequest.count({
+      where: {
+        id: pr.id,
+        likes: {
+          some: {
+            id: ctxUserId,
+          }
+        }
+      },
+    }) > 0
+    const disliked = await prisma.pullRequest.count({
+      where: {
+        id: pr.id,
+        dislikes: {
+          some: {
+            id: ctxUserId,
+          }
+        }
+      },
+    }) > 0
+
+    let toggleToLiked = !liked && disliked && data.action === 'Like'
+    let toggleToDisLiked = liked && !disliked && data.action === 'Dislike'
+
+    let updated = await prisma.pullRequest.update({
+      where: {
+        id: pr.id,
+      },
+      data: {
+        ...((data.action === 'Like' || toggleToDisLiked) && {
+          likes: {
+            [!liked && !toggleToDisLiked ? 'connect' : 'disconnect']: {
+              id: ctxUserId
+            }
+          },
+        }),
+        ...((data.action === 'Dislike' || toggleToLiked) && {
+          dislikes: {
+            [!disliked && !toggleToLiked ? 'connect' : 'disconnect']: {
+              id: ctxUserId
+            }
+          }
+        })
+      },
+      ...select
+    })
+    return updated
+  }
+})
+
+export const toggleDislikePr = mutationField('toggleDislikePr', {
   type: 'Boolean',
   args: {
     where: nonNull('PullRequestWhereUniqueInput'),
   },
-  description: '切换支持PR',
+  description: '踩PR',
   async resolve(_parnet, { where }, { prisma, ctx }) {
     const pr = await prisma.pullRequest.findUnique({
       include: {
-        likes: true,
+        dislikes: true,
       },
       where,
       rejectOnNotFound: true,
     })
-    let meUser = await prisma.user.findUnique({
-      where: {
-        id: ctx.state.user.id,
-      }
-    })
+    
+    const ctxUserId = ctx.state.user.id
+
     let isLiked = await prisma.pullRequest.count({
       where: {
         id: pr.id,
         likes: {
           some: {
-            id: meUser.id,
+            id: ctxUserId,
           }
         }
       },
@@ -34,9 +98,9 @@ export const toggleLikePr = mutationField('toggleLikePr', {
         id: pr.id,
       },
       data: {
-        likes: {
+        dislikes: {
           [isLiked ? 'disconnect' : 'connect']: {
-            id: meUser.id
+            id: ctxUserId
           }
         }
       }
