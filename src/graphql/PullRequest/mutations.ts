@@ -1,3 +1,5 @@
+import { ErrorCode } from '@/graphql/Error'
+import { ApolloError } from 'apollo-server-koa'
 import { mutationField, nonNull } from 'nexus'
 
 export const togglePullRequestEvaluation = mutationField('togglePullRequestEvaluation', {
@@ -14,6 +16,18 @@ export const togglePullRequestEvaluation = mutationField('togglePullRequestEvalu
     })
 
     const ctxUserId = ctx.state.user.id
+
+    let isCtxUserCreated = await prisma.pullRequest.count({
+      where: {
+        id: pr.id,
+        issue: {
+          some: {
+            userId: ctxUserId
+          }
+        }
+      }
+    })
+    if (isCtxUserCreated) throw new ApolloError('do\'t evaluation own pr', ErrorCode.PR1007)
 
     const liked = await prisma.pullRequest.count({
       where: {
@@ -62,49 +76,5 @@ export const togglePullRequestEvaluation = mutationField('togglePullRequestEvalu
       ...select
     })
     return updated
-  }
-})
-
-export const toggleDislikePr = mutationField('toggleDislikePr', {
-  type: 'Boolean',
-  args: {
-    where: nonNull('PullRequestWhereUniqueInput'),
-  },
-  description: '踩PR',
-  async resolve(_parnet, { where }, { prisma, ctx }) {
-    const pr = await prisma.pullRequest.findUnique({
-      include: {
-        dislikes: true,
-      },
-      where,
-      rejectOnNotFound: true,
-    })
-    
-    const ctxUserId = ctx.state.user.id
-
-    let isLiked = await prisma.pullRequest.count({
-      where: {
-        id: pr.id,
-        likes: {
-          some: {
-            id: ctxUserId,
-          }
-        }
-      },
-    }) > 0
-
-    await prisma.pullRequest.update({
-      where: {
-        id: pr.id,
-      },
-      data: {
-        dislikes: {
-          [isLiked ? 'disconnect' : 'connect']: {
-            id: ctxUserId
-          }
-        }
-      }
-    })
-    return !isLiked
   }
 })
