@@ -41,9 +41,9 @@ export const isHasRole = (roles: string[]) => chain(isAuthenticated, rule({ cach
  * @param policy 策略 顺序 [obj, act]
  */
 export const isCanPolicy = (policy: string[]) => chain(isAuthenticated, rule({ cache: 'contextual' })(
-  (parent, args, { ctx, casbin }: Context, info) => {
+  async (parent, args, { ctx, casbin }: Context, info) => {
     let user = ctx.state.user
-    if (!casbin.e.enforceSync(user?.name || user.opid, ...policy)) {
+    if (!await casbin.e.enforce(user?.name || user.opid, ...policy)) {
       return new Error('Not Authorised!')
     } else {
       return true
